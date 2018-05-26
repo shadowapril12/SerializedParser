@@ -2,9 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
 using System.IO;
+using Newtonsoft.Json;
 
 
 namespace Add_Class_To_Parse
@@ -28,6 +27,8 @@ namespace Add_Class_To_Parse
 
         //Переменная, в которую возвращается результат метода CheckString
         private bool resOfCheck;
+
+
 
 
         /// <summary>
@@ -162,39 +163,58 @@ namespace Add_Class_To_Parse
                 end = DateTime.Now;
                 duration = end - begin;
 
-                string res = CalcExpression(S);
+                res = CalcExpression(S);
 
                 Console.WriteLine("\nРезультат выражения {0}", res + "\n");
 
                 Console.WriteLine("Продолжительность выполнения программы: {0}," +
                     " количество операций {1}\n", duration.TotalMilliseconds + "\n", operCount);
 
-                Serializer s = new Serializer();
+                Collection col = new Collection() { Storage = new List<Data>() };
 
-                //Передача значения переменной operCount(количество операций) - переменной класса Serializer для
-                //дальнейшей сериализации
-                s.countOfOperations = operCount;
+                Data data = new Data() { StringOfExpression = S, CountOfOperations = operCount, Dur = duration.TotalMilliseconds, Result = res };
 
-                //Передача результата математического выражения переменной класса Serializer для
-                //дальнейшей сериализации
-                s.result = res;
-
-                //Передача значения duration переменной класса Serializer для дальнейшей сериализации
-                s.dur = duration.TotalMilliseconds;
-
-                //Передача значения свойства 'S' - переменной класса Serializer для дальнейшей сериализации
-                s.stringOfExpression = S;
-
-                //Класс предназначенный для сериализации объектов
-                DataContractJsonSerializer jSon = new DataContractJsonSerializer(typeof(Serializer));
-
-                //Файл в котором будут сохраняться сериализованные объекты
+                //Путь к файлу где будет храниться сериализованная коллекция
                 string path = "res.json";
 
-                //Добавление сериализованных объектов в файл
-                using (FileStream fs = new FileStream(path, FileMode.Append))
+                //Строка для хранения сериализованного коллекции
+                string serialized;
+
+                //Если файла в указанной директории не существует
+                if (!File.Exists(path))
                 {
-                    jSon.WriteObject(fs, s);
+                    //Создается файл, закрывается поток
+                    File.Create(path).Close();
+
+                    //Создание экземпляра класса Collection
+                    col = new Collection() { Storage = new List<Data>() };
+
+                    //Добавление в коллекцию экземпляра класса 'Data'
+                    col.Storage.Add(data);
+
+                    //Сериализация коллекции и передача ее в строку
+                    serialized = JsonConvert.SerializeObject(col.Storage);
+
+                    //Запись строки в файл
+                    File.WriteAllText(path, serialized, System.Text.Encoding.Default);
+                }
+                //Если файл существет, то в нем уже есть первая запись
+                else
+                {
+                    //Поэтому считываем содержимое файла в строку 'collection'
+                    string collection = File.ReadAllText(path);
+
+                    //Десереализуем содержимое строки
+                    col.Storage = JsonConvert.DeserializeObject<List<Data>>(collection);
+
+                    //Добавляем новую запись к коллекции
+                    col.Storage.Add(data);
+
+                    //Обратно сериализуем
+                    serialized = JsonConvert.SerializeObject(col.Storage);
+
+                    //И записываем в файл, все в той же директории
+                    File.WriteAllText(path, serialized, System.Text.Encoding.Default);
                 }
             }  
         }

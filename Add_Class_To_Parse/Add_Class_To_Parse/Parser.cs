@@ -14,7 +14,7 @@ namespace Add_Class_To_Parse
     class Parser
     {
         protected int index;
-        protected string res;
+        public string res;
         //Свойство s - служит для возврата и передачи значения приватному полю s, 
         public string S { get; set; }
         /// <summary>

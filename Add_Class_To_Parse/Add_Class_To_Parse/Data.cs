@@ -4,29 +4,30 @@ using System.Text;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Add_Class_To_Parse
 {
     /// <summary>
     /// Сериализуемый класс
     /// </summary>
-    [DataContract]
-    class Serializer
+    [Serializable]
+    class Data
     {
         //Переменная хранящая вводимое с консоли выражение
-        [DataMember]
-        public string stringOfExpression;
+
+        public string StringOfExpression { get; set; }
 
         //Продолжительность выполнения математического выражения
-        [DataMember]
-        public double dur;
+
+        public double Dur { get; set; }
 
         //Количество математический операций в выражении
-        [DataMember]
-        public int countOfOperations;
+
+        public int CountOfOperations { get; set; }
 
         //Результат математического выражения
-        [DataMember]
-        public string result;
+
+        public string Result { get; set; }
     }
 }
